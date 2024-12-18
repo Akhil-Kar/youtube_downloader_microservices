@@ -2,9 +2,6 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 
 # Set your credentials manually
-aws_access_key_id = 'AKIA3LWC6D43CCHIRUXS'
-aws_secret_access_key = 'VnojfiwhIjanwtmoLBnwjJFnjx1rq/c697Jbg7+h'
-region_name = 'ap-south-1'
 
 # Create a session using the above credentials
 # session = boto3.Session(
