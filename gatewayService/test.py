@@ -3,13 +3,6 @@ from botocore.exceptions import NoCredentialsError
 
 # Set your credentials manually
 
-# Create a session using the above credentials
-# session = boto3.Session(
-#     aws_access_key_id=aws_access_key_id,
-#     aws_secret_access_key=aws_secret_access_key,
-#     region_name=region_name
-# )
-
 # Now you can create an S3 client or resource
 # s3 = session.client('s3')
 s3 = boto3.client('s3')
