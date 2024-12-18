@@ -4,10 +4,11 @@ import jwt
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import os
 
 # Initialize Flask app and database
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_jwt_secret_key'  # Secret key to encode JWT tokens
+app.config['SECRET_KEY'] = os.getenv('JWT_SECRET')  # Secret key to encode JWT tokens
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)

@@ -1,0 +1,20 @@
+curl -X POST http://127.0.0.1:5000/resolutions \
+  -H "Content-Type: application/json" \
+  -d '{
+        "url": "https://www.youtube.com/watch?v=-hK3co5D4VU"
+      }'
+
+
+curl -X POST http://127.0.0.1:5000/download \
+  -H "Content-Type: application/json" \
+  -d '{
+        "url": "https://www.youtube.com/watch?v=-hK3co5D4VU",
+        "resolution": "720p",
+        "title": "BHAVYA SHAH KO DEKHKAR ANKH PHOD LI | Indias Got Latent"
+      }'
+curl -X GET http://127.0.0.1:5000/status 
+
+curl -X GET http://127.0.0.1:5000/status/4d7ffcfa
+
+curl -X POST http://127.0.0.1:5000/download/4d7ffcfa \
+  -H "Content-Type: application/json"
