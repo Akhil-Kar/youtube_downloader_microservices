@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service-deployment
+  labels:
+    app: auth-service
+spec:
+  replicas: 2  # Number of instances of the app to run
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service-container
+          image: akhilkar18k/yt-autoservice:latest  # Replace with your image location
+          ports:
+            - containerPort: 5001  # The container port your app exposes
+          env:
+            - name: JWT_SECRET
+              value: "authServiceJWTSecret"  # Example environment variable
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

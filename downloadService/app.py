@@ -30,10 +30,12 @@ channel = connection.channel()
 # Declare a queue
 channel.queue_declare(queue='download_queue', durable=True)
 
+status_url = f'http://{os.getenv('STATUS_URL')}:5000/update_status'
+
 # Function to download video
 def download_video_from_url(download_id, url, resolution, title):
     # Update status to "In Progress"
-    requests.post('http://localhost:5000/update_status', json={
+    requests.post(status_url, json={
         'download_id': download_id,
         'status': 'In Progress'
     })
@@ -61,13 +63,13 @@ def download_video_from_url(download_id, url, resolution, title):
         upload_file_to_s3(f'./downloads/{download_id}_{title}.webm', 'youtubemicroservice', f'media/{download_id}_{title}.mp4')
         
         # Update status to "Completed"
-        requests.post('http://localhost:5000/update_status', json={
+        requests.post(status_url, json={
             'download_id': download_id,
             'status': 'Completed'
         })
     except Exception as e:
         # Update status to "Failed" with error
-        requests.post('http://localhost:5000/update_status', json={
+        requests.post(status_url, json={
             'download_id': download_id,
             'status': 'Failed',
             'error': str(e)

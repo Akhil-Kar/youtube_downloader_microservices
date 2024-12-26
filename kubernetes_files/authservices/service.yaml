@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service-service
+spec:
+  selector:
+    app: auth-service  # Must match the label of the deployment
+  ports:
+    - protocol: TCP
+      port: 5001      # The port on which the service will be available
+      targetPort: 5001  # The port inside the container
+  type: LoadBalancer  # Use LoadBalancer for cloud providers like AWS/GCP
+  # Use NodePort if you want to expose the service via the node IP and a port
+  # type: NodePort
+  # Use ClusterIP for internal communication only (default)
+  # type: ClusterIP

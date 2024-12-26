@@ -16,7 +16,7 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('JWT_SECRET')  # Secret key to encode JWT tokens
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///status.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -114,7 +114,16 @@ def download_video(username):
 
     # Generate a unique download ID
     download_id = str(uuid.uuid4()).replace("-", "")[:8]
-    download_status[download_id] = {'status': 'Queued', 'url': youtube_url, 'resolution': resolution}
+    # download_status[download_id] = {'status': 'Queued', 'url': youtube_url, 'resolution': resolution}
+
+    new_status = DownloadStatus(
+            username=username,
+            download_id=download_id,
+            title=title,
+            status='Queued'
+        )
+    db.session.add(new_status)  # Add the new record to the session
+    db.session.commit()
 
     # Add the download task to the RabbitMQ queue
     channel.basic_publish(exchange='',
@@ -127,9 +136,17 @@ def download_video(username):
 @app.route('/status/<download_id>', methods=['GET'])
 @token_required
 def get_status(download_id, username):
-    status = download_status.get(download_id)
-    if status:
-        return jsonify(status)
+    # status = download_status.get(download_id)
+    record = DownloadStatus.query.filter_by(username=username, download_id=download_id).first()
+    if record:
+        result = {
+            "id": record.id,
+            "username": record.username,
+            "download_id": record.download_id,
+            "title": record.title,
+            "status": record.status
+        }
+        return jsonify({"record": result}), 200
     else:
         return jsonify({"error": "Download ID not found"}), 404
 
@@ -137,8 +154,19 @@ def get_status(download_id, username):
 @token_required
 def get_all_statuses(username):
     """Get the status of all downloads"""
-    if download_status:
-        return jsonify(download_status)
+    records = DownloadStatus.query.filter_by(username=username).all()
+    if records:
+        results = [
+            {
+                "id": record.id,
+                "username": record.username,
+                "download_id": record.download_id,
+                "title": record.title,
+                "status": record.status
+            }
+            for record in records
+        ]
+        return jsonify({"records": results}), 200
     else:
         return jsonify({"error": "No download tasks available"}), 404
 
@@ -152,10 +180,16 @@ def update_status():
     if not download_id or not status:
         return jsonify({"error": "Download ID and status required"}), 400
 
-    if download_id in download_status:
-        download_status[download_id]['status'] = status
-        if error:
-            download_status[download_id]['error'] = error
+    record = DownloadStatus.query.filter_by(download_id=download_id).first()
+    # if download_id in download_status:
+    #     download_status[download_id]['status'] = status
+    #     if error:
+    #         download_status[download_id]['error'] = error
+    #     return jsonify({"message": "Status updated successfully"})
+
+    if record:
+        record.status = status or error
+        db.session.commit()
         return jsonify({"message": "Status updated successfully"})
     else:
         return jsonify({"error": "Download ID not found"}), 404
